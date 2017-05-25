@@ -25,6 +25,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImagesView> {
 
     private IImagesView mView;
+    private List<String> mPhotosUrls;
 
     @Override
     public void bindView(IImagesView view) {
@@ -37,29 +38,26 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
         String baseUrl = "https://api.flickr.com/services/rest/";
         Retrofit retrofit = buildRetrofit(baseUrl);
         GetImagesCollection getImagesCollection = retrofit.create(GetImagesCollection.class);
-        Executors.newSingleThreadExecutor().submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Response<ImagesCollection> response = getImagesCollection.getImagesCollection(userChoice).execute();
-                    if (response != null) {
-                        ImagesCollection imagesCollection = response.body();
-                        if (imagesCollection != null) {
-                            Photos photos = imagesCollection.getPhotos();
-                            if (photos != null) {
-                                List<Photo> photosList = photos.getPhoto();
-                                List<String> photosUrls = Stream.of(photosList).map(photo ->
-                                        String.format("http://farm%s.static.flickr.com/%s/%s_%s.jpg", photo.getFarm(), photo.getServer(), photo.getId(), photo.getSecret())
-                                ).collect(Collectors.toList());
-                                if (mView != null) {
-                                    mView.showImagesByUrls(photosUrls);
-                                }
+        Executors.newSingleThreadExecutor().submit(() -> {
+            try {
+                Response<ImagesCollection> response = getImagesCollection.getImagesCollection(userChoice).execute();
+                if (response != null) {
+                    ImagesCollection imagesCollection = response.body();
+                    if (imagesCollection != null) {
+                        Photos photos = imagesCollection.getPhotos();
+                        if (photos != null) {
+                            List<Photo> photosList = photos.getPhoto();
+                            mPhotosUrls = Stream.of(photosList).map(photo ->
+                                    String.format("http://farm%s.static.flickr.com/%s/%s_%s.jpg", photo.getFarm(), photo.getServer(), photo.getId(), photo.getSecret())
+                            ).collect(Collectors.toList());
+                            if (mView != null) {
+                                mView.showImagesByUrls(mPhotosUrls);
                             }
                         }
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
     }
@@ -78,13 +76,14 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
 
 
     @Override
-    public List getCachedImagesCollection() {
-        return null;
-    }
-
-    @Override
-    public IImagesView getImageById() {
-        return null;
+    public boolean showCachedImagesCollection() {
+        if (mPhotosUrls != null && !mPhotosUrls.isEmpty()) {
+            if (mView != null) {
+                mView.showImagesByUrls(mPhotosUrls);
+                return true;
+            }
+        }
+        return false;
     }
 
 }

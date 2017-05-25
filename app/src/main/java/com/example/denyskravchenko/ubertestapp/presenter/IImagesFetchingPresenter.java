@@ -14,9 +14,6 @@ public interface IImagesFetchingPresenter<T extends IImagesView> {
 
     void fetchImagesCollection(String userChoice);
 
-    List<T> getCachedImagesCollection();
-
-    T getImageById();
-
+    boolean showCachedImagesCollection();
 
 }

@@ -2,10 +2,8 @@ package com.example.denyskravchenko.ubertestapp.view;
 
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
@@ -15,7 +13,6 @@ import com.example.denyskravchenko.ubertestapp.UberApplication;
 import com.example.denyskravchenko.ubertestapp.presenter.ImagesFetchingPresenter;
 import com.example.denyskravchenko.ubertestapp.utils.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -45,8 +42,8 @@ public class ImagesView extends IImagesView {
         int columnsNumber = 3;
         GridLayoutManager layoutManager = new GridLayoutManager(this, columnsNumber);
         mImagesGrid.setLayoutManager(layoutManager);
-
-        mPresenter.fetchImagesCollection("cat");
+        if (!mPresenter.showCachedImagesCollection())
+            mPresenter.fetchImagesCollection("cat");
 
     }
 

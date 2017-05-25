@@ -23,7 +23,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImagesView> {
-    private Retrofit mRetrofit;
+
     private IImagesView mView;
 
     @Override

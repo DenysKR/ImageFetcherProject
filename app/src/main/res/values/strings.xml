@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">UberTestApp</string>
+    <string name="search_hint">Type search world</string>
 </resources>

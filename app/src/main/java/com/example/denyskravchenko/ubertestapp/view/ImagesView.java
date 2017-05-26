@@ -1,9 +1,14 @@
 package com.example.denyskravchenko.ubertestapp.view;
 
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
@@ -45,7 +50,17 @@ public class ImagesView extends IImagesView {
         if (!mPresenter.showCachedImagesCollection())
             mPresenter.fetchImagesCollection("cat");
 
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            searchPredictions(query);
+        }
     }
+
+    private void searchPredictions(String query) {
+        // TODO: 26.05.17 Implement me
+    }
+
 
     @Override
     public void showImagesByUrls(List<String> photos) {
@@ -96,6 +111,14 @@ public class ImagesView extends IImagesView {
         public int getItemCount() {
             return mUrls.size();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+
+        return true;
     }
 
 

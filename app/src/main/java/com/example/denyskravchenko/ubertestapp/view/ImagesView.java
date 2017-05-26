@@ -87,6 +87,7 @@ public class ImagesView extends IImagesView {
             Glide.with(ImagesView.this)
                     .load(mUrls.get(position))
                     .override(mImageSize, mImageSize)
+                    .centerCrop()
                     .into(holder.mPhotoItem);
 
         }

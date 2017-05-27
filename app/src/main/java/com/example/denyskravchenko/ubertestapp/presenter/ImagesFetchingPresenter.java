@@ -59,6 +59,7 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
         if (!TextUtils.isEmpty(userChoice)) {
             List<String> cache = mCache.get(userChoice);
             if (cache != null && !cache.isEmpty()) {
+                mPhotosUrls = cache;
                 if (view != null) {
                     view.showImagesByUrls(mPhotosUrls);
                 }

@@ -12,8 +12,8 @@ public interface IImagesFetchingPresenter<T extends IImagesView> {
 
     void bindView(T view);
 
-    void fetchImagesCollection(String userChoice);
+    void unbindView();
 
-    boolean showCachedImagesCollection();
+    void fetchImagesCollectionOrGetFromCache(String userChoice);
 
 }

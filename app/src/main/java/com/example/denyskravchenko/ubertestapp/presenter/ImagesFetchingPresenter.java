@@ -1,5 +1,8 @@
 package com.example.denyskravchenko.ubertestapp.presenter;
 
+import android.text.TextUtils;
+import android.util.LruCache;
+
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.example.denyskravchenko.ubertestapp.model.ImagesCollection;
@@ -26,40 +29,65 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
 
     private IImagesView mView;
     private List<String> mPhotosUrls;
+    private LruCache<String, List<String>> mCache;
+
+    public ImagesFetchingPresenter() {
+        int cacheSize = 5;
+        mCache = new LruCache<>(cacheSize);
+    }
 
     @Override
     public void bindView(IImagesView view) {
+        if (view == null)
+            throw new IllegalArgumentException("View and queryString can't be null");
         mView = view;
+
     }
 
 
     @Override
-    public void fetchImagesCollection(String userChoice) {
-        String baseUrl = "https://api.flickr.com/services/rest/";
-        Retrofit retrofit = buildRetrofit(baseUrl);
-        GetImagesCollection getImagesCollection = retrofit.create(GetImagesCollection.class);
-        Executors.newSingleThreadExecutor().submit(() -> {
-            try {
-                Response<ImagesCollection> response = getImagesCollection.getImagesCollection(userChoice).execute();
-                if (response != null) {
-                    ImagesCollection imagesCollection = response.body();
-                    if (imagesCollection != null) {
-                        Photos photos = imagesCollection.getPhotos();
-                        if (photos != null) {
-                            List<Photo> photosList = photos.getPhoto();
-                            mPhotosUrls = Stream.of(photosList).map(photo ->
-                                    String.format("http://farm%s.static.flickr.com/%s/%s_%s.jpg", photo.getFarm(), photo.getServer(), photo.getId(), photo.getSecret())
-                            ).collect(Collectors.toList());
-                            if (mView != null) {
-                                mView.showImagesByUrls(mPhotosUrls);
+    public void unbindView() {
+        mView = null;
+    }
+
+
+    @Override
+    public void fetchImagesCollectionOrGetFromCache(String userChoice) {
+        if (!TextUtils.isEmpty(userChoice)) {
+            List<String> cache = mCache.get(userChoice);
+            if (cache != null && !cache.isEmpty()) {
+                if (mView != null) {
+                    mView.showImagesByUrls(mPhotosUrls);
+                }
+            } else {
+                String baseUrl = "https://api.flickr.com/services/rest/";
+                Retrofit retrofit = buildRetrofit(baseUrl);
+                GetImagesCollection getImagesCollection = retrofit.create(GetImagesCollection.class);
+                Executors.newSingleThreadExecutor().submit(() -> {
+                    try {
+                        Response<ImagesCollection> response = getImagesCollection.getImagesCollection(userChoice).execute();
+                        if (response != null) {
+                            ImagesCollection imagesCollection = response.body();
+                            if (imagesCollection != null) {
+                                Photos photos = imagesCollection.getPhotos();
+                                if (photos != null) {
+                                    List<Photo> photosList = photos.getPhoto();
+                                    mPhotosUrls = Stream.of(photosList).map(photo ->
+                                            String.format("http://farm%s.static.flickr.com/%s/%s_%s.jpg", photo.getFarm(), photo.getServer(), photo.getId(), photo.getSecret())
+                                    ).collect(Collectors.toList());
+                                    if (mView != null) {
+                                        mCache.put(userChoice, mPhotosUrls);
+                                        mView.showImagesByUrls(mPhotosUrls);
+                                    }
+                                }
                             }
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                });
             }
-        });
+        }
     }
 
     private Retrofit buildRetrofit(String url) {
@@ -72,18 +100,6 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         return retrofit;
-    }
-
-
-    @Override
-    public boolean showCachedImagesCollection() {
-        if (mPhotosUrls != null && !mPhotosUrls.isEmpty()) {
-            if (mView != null) {
-                mView.showImagesByUrls(mPhotosUrls);
-                return true;
-            }
-        }
-        return false;
     }
 
 }

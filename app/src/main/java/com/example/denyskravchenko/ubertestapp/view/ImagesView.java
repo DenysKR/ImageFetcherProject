@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,8 +49,6 @@ public class ImagesView extends IImagesView {
         int columnsNumber = 3;
         GridLayoutManager layoutManager = new GridLayoutManager(this, columnsNumber);
         mImagesGrid.setLayoutManager(layoutManager);
-        if (!mPresenter.showCachedImagesCollection())
-            mPresenter.fetchImagesCollection("cat");
 
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -58,7 +58,7 @@ public class ImagesView extends IImagesView {
     }
 
     private void searchPredictions(String query) {
-        // TODO: 26.05.17 Implement me
+        mPresenter.fetchImagesCollectionOrGetFromCache(query);
     }
 
 
@@ -99,11 +99,15 @@ public class ImagesView extends IImagesView {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            Glide.with(ImagesView.this)
-                    .load(mUrls.get(position))
-                    .override(mImageSize, mImageSize)
-                    .centerCrop()
-                    .into(holder.mPhotoItem);
+            String imageUrl = mUrls.get(position);
+            if (!TextUtils.isEmpty(imageUrl))
+                Glide.with(ImagesView.this)
+                        .load(imageUrl)
+                        .override(mImageSize, mImageSize)
+                        .centerCrop()
+                        .into(holder.mPhotoItem);
+            else
+                Glide.clear(holder.mPhotoItem);
 
         }
 
@@ -118,8 +122,17 @@ public class ImagesView extends IImagesView {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
 
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+
         return true;
     }
 
-
+    @Override
+        protected void onDestroy() {
+        super.onDestroy();
+        mPresenter.unbindView();
+    }
 }

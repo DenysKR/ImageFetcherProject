@@ -46,7 +46,6 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
 
     }
 
-
     @Override
     public void unbindView() {
         mView = null;

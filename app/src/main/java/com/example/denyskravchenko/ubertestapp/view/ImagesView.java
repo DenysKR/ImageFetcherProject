@@ -74,6 +74,11 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
 
     }
 
+
+    public void setPresenter(ImagesFetchingPresenter mPresenter) {
+        this.mPresenter = mPresenter;
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -97,7 +102,7 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
         }
     }
 
-    private void searchPredictions(String query) {
+    public void searchPredictions(String query) {
         if (!Utils.isNetworkAvailable(this)) {
             showNoNetworkMessage();
             return;

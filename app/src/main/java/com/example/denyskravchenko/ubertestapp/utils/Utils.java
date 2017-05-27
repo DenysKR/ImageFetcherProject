@@ -28,10 +28,12 @@ public class Utils {
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            Log.i("NetworkStatus :", "Network connection available.");
-            return true;
+        if (cm != null) {
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+                Log.i("NetworkStatus :", "Network connection available.");
+                return true;
+            }
         }
         return false;
     }

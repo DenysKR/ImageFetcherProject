@@ -45,5 +45,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC0'
     compile 'com.jakewharton:butterknife:8.6.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
+    compile 'org.greenrobot:eventbus:3.0.0'
+
     testCompile 'junit:junit:4.12'
 }

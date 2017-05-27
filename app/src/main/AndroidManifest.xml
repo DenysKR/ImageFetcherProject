@@ -3,6 +3,7 @@
     package="com.example.denyskravchenko.ubertestapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:name=".UberApplication"
@@ -27,6 +28,12 @@
         <provider
             android:name=".presenter.SuggestionProvider"
             android:authorities="com.example.denyskravchenko.ubertestapp.presenter.SuggestionProvider" />
+        <receiver
+            android:name=".presenter.NetworkDetector">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

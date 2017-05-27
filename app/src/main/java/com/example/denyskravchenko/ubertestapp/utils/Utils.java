@@ -2,7 +2,10 @@ package com.example.denyskravchenko.ubertestapp.utils;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 /**
  * Created by denyskravchenko on 26.05.17.
@@ -20,5 +23,16 @@ public class Utils {
             return px;
         }
         return 0;
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+            Log.i("NetworkStatus :", "Network connection available.");
+            return true;
+        }
+        return false;
     }
 }

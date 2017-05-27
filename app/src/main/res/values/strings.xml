@@ -2,4 +2,5 @@
     <string name="app_name">UberTestApp</string>
     <string name="search_hint">Type search world</string>
     <string name="nothing_to_show">Nothing to show</string>
+    <string name="check_your_internet_connection_message">Check your internet connection</string>
 </resources>

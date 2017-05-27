@@ -9,6 +9,7 @@ import com.example.denyskravchenko.ubertestapp.model.ImagesCollection;
 import com.example.denyskravchenko.ubertestapp.model.Photo;
 import com.example.denyskravchenko.ubertestapp.model.Photos;
 import com.example.denyskravchenko.ubertestapp.presenter.requests.GetImagesCollection;
+import com.example.denyskravchenko.ubertestapp.utils.Utils;
 import com.example.denyskravchenko.ubertestapp.view.IImagesView;
 
 import java.io.IOException;
@@ -54,11 +55,11 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
 
     @Override
     public void fetchImagesCollectionOrGetFromCache(String userChoice) {
+        IImagesView view = mView.get();
         if (!TextUtils.isEmpty(userChoice)) {
             List<String> cache = mCache.get(userChoice);
             if (cache != null && !cache.isEmpty()) {
-                IImagesView view = mView.get();
-                if (view!= null) {
+                if (view != null) {
                     view.showImagesByUrls(mPhotosUrls);
                 }
             } else {
@@ -77,7 +78,6 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
                                     mPhotosUrls = Stream.of(photosList).map(photo ->
                                             String.format("http://farm%s.static.flickr.com/%s/%s_%s.jpg", photo.getFarm(), photo.getServer(), photo.getId(), photo.getSecret())
                                     ).collect(Collectors.toList());
-                                    IImagesView view = mView.get();
                                     if (view != null) {
                                         mCache.put(userChoice, mPhotosUrls);
                                         view.showImagesByUrls(mPhotosUrls);

@@ -20,4 +20,5 @@ public abstract class IImagesView extends AppCompatActivity {
 
 
     abstract public void showImagesByUrls(List<String> photos);
+    abstract public void showNoNetworkMessage();
 }

@@ -22,9 +22,14 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.denyskravchenko.ubertestapp.R;
 import com.example.denyskravchenko.ubertestapp.UberApplication;
+import com.example.denyskravchenko.ubertestapp.events.NetworkChangedEvent;
 import com.example.denyskravchenko.ubertestapp.presenter.ImagesFetchingPresenter;
 import com.example.denyskravchenko.ubertestapp.presenter.SuggestionProvider;
 import com.example.denyskravchenko.ubertestapp.utils.Utils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +71,19 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
         mImagesGrid.setHasFixedSize(true);
 
         handleSearchIntent();
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     private void handleSearchIntent() {
@@ -80,6 +98,10 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
     }
 
     private void searchPredictions(String query) {
+        if (!Utils.isNetworkAvailable(this)) {
+            showNoNetworkMessage();
+            return;
+        }
         mPresenter.fetchImagesCollectionOrGetFromCache(query);
     }
 
@@ -98,6 +120,24 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
             errorLabel.setVisibility(View.VISIBLE);
             mImagesGrid.setVisibility(View.GONE);
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(Object event) {
+        if (event instanceof NetworkChangedEvent) {
+            NetworkChangedEvent networkChangedEvent = (NetworkChangedEvent) event;
+            String message = networkChangedEvent.isIsNetworkAvailable() ? getString(R.string.nothing_to_show) : getString(R.string.check_your_internet_connection_message);
+            errorLabel.setVisibility(View.VISIBLE);
+            errorLabel.setText(message);
+            mImagesGrid.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void showNoNetworkMessage() {
+        errorLabel.setVisibility(View.VISIBLE);
+        errorLabel.setText(R.string.check_your_internet_connection_message);
+        mImagesGrid.setVisibility(View.GONE);
     }
 
     @Override

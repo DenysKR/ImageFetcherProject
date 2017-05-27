@@ -1,6 +1,5 @@
 package com.example.denyskravchenko.ubertestapp.di;
 
-import com.example.denyskravchenko.ubertestapp.presenter.IImagesFetchingPresenter;
 import com.example.denyskravchenko.ubertestapp.presenter.ImagesFetchingPresenter;
 
 import javax.inject.Singleton;
@@ -18,6 +17,4 @@ public class ImageFetchingModule {
     ImagesFetchingPresenter providesFetchingPresenter() {
         return new ImagesFetchingPresenter();
     }
-
-
 }

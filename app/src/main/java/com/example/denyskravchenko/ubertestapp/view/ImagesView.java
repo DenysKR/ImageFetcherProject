@@ -14,8 +14,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.denyskravchenko.ubertestapp.R;
@@ -32,13 +34,15 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ImagesView extends IImagesView implements SearchView.OnSuggestionListener{
+public class ImagesView extends IImagesView implements SearchView.OnSuggestionListener {
 
     @Inject
     ImagesFetchingPresenter mPresenter;
 
     @BindView(R.id.images_grid)
     RecyclerView mImagesGrid;
+    @BindView(R.id.error_label)
+    TextView errorLabel;
 
     private ImagesAdapter mAdapter;
     private SearchView mSearchView;
@@ -82,11 +86,18 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
 
     @Override
     public void showImagesByUrls(List<String> photos) {
-        mImagesGrid.post(() -> {
-            mUrls.clear();
-            mUrls.addAll(photos);
-            mAdapter.notifyDataSetChanged();
-        });
+        if (photos != null && !photos.isEmpty()) {
+            mImagesGrid.post(() -> {
+                mUrls.clear();
+                mUrls.addAll(photos);
+                mAdapter.notifyDataSetChanged();
+                errorLabel.setVisibility(View.GONE);
+                mImagesGrid.setVisibility(View.VISIBLE);
+            });
+        } else {
+            errorLabel.setVisibility(View.VISIBLE);
+            mImagesGrid.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -168,11 +179,5 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-        protected void onDestroy() {
-        super.onDestroy();
-//        mPresenter.unbindView();
     }
 }

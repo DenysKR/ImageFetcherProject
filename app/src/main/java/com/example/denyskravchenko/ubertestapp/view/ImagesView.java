@@ -24,6 +24,7 @@ import com.example.denyskravchenko.ubertestapp.presenter.ImagesFetchingPresenter
 import com.example.denyskravchenko.ubertestapp.presenter.SuggestionProvider;
 import com.example.denyskravchenko.ubertestapp.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -42,6 +43,8 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
     private ImagesAdapter mAdapter;
     private SearchView mSearchView;
 
+    private List<String> mUrls = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +57,10 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
         int columnsNumber = 3;
         GridLayoutManager layoutManager = new GridLayoutManager(this, columnsNumber);
         mImagesGrid.setLayoutManager(layoutManager);
+        mAdapter = new ImagesAdapter(mUrls);
+        mImagesGrid.setAdapter(mAdapter);
+        mImagesGrid.setHasFixedSize(true);
+
         handleSearchIntent();
     }
 
@@ -76,9 +83,9 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
     @Override
     public void showImagesByUrls(List<String> photos) {
         mImagesGrid.post(() -> {
-            mAdapter = new ImagesAdapter(photos);
-            mImagesGrid.setAdapter(mAdapter);
-            mImagesGrid.setHasFixedSize(true);
+            mUrls.clear();
+            mUrls.addAll(photos);
+            mAdapter.notifyDataSetChanged();
         });
     }
 

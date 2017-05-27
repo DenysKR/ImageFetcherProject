@@ -125,11 +125,12 @@ public class ImagesView extends IImagesView implements SearchView.OnSuggestionLi
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(Object event) {
         if (event instanceof NetworkChangedEvent) {
-            NetworkChangedEvent networkChangedEvent = (NetworkChangedEvent) event;
-            String message = networkChangedEvent.isIsNetworkAvailable() ? getString(R.string.nothing_to_show) : getString(R.string.check_your_internet_connection_message);
-            errorLabel.setVisibility(View.VISIBLE);
-            errorLabel.setText(message);
-            mImagesGrid.setVisibility(View.GONE);
+            if (errorLabel.getVisibility() == View.VISIBLE) {
+                NetworkChangedEvent networkChangedEvent = (NetworkChangedEvent) event;
+                String message = networkChangedEvent.isIsNetworkAvailable() ? getString(R.string.nothing_to_show) : getString(R.string.check_your_internet_connection_message);
+                errorLabel.setVisibility(View.VISIBLE);
+                errorLabel.setText(message);
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.example.denyskravchenko.ubertestapp.view;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.v7.widget.GridLayoutManager;
@@ -12,6 +13,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
@@ -29,7 +31,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ImagesView extends IImagesView {
+public class ImagesView extends IImagesView implements SearchView.OnSuggestionListener{
 
     @Inject
     ImagesFetchingPresenter mPresenter;
@@ -38,6 +40,7 @@ public class ImagesView extends IImagesView {
     RecyclerView mImagesGrid;
 
     private ImagesAdapter mAdapter;
+    private SearchView mSearchView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,14 +54,17 @@ public class ImagesView extends IImagesView {
         int columnsNumber = 3;
         GridLayoutManager layoutManager = new GridLayoutManager(this, columnsNumber);
         mImagesGrid.setLayoutManager(layoutManager);
+        handleSearchIntent();
+    }
 
+    private void handleSearchIntent() {
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
+            searchPredictions(query);
             SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
                     SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
             suggestions.saveRecentQuery(query, null);
-            searchPredictions(query);
         }
     }
 
@@ -74,6 +80,22 @@ public class ImagesView extends IImagesView {
             mImagesGrid.setAdapter(mAdapter);
             mImagesGrid.setHasFixedSize(true);
         });
+    }
+
+    @Override
+    public boolean onSuggestionSelect(int position) {
+        return true;
+    }
+
+    @Override
+    public boolean onSuggestionClick(int position) {
+        android.support.v4.widget.CursorAdapter selectedView = mSearchView.getSuggestionsAdapter();
+        Cursor cursor = (Cursor) selectedView.getItem(position);
+        int index = cursor.getColumnIndexOrThrow(SearchManager.SUGGEST_COLUMN_TEXT_1);
+        String query = cursor.getString(index);
+        mSearchView.setQuery(query, true);
+        searchPredictions(query);
+        return true;
     }
 
     public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder> {
@@ -128,16 +150,22 @@ public class ImagesView extends IImagesView {
         inflater.inflate(R.menu.menu, menu);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setIconifiedByDefault(false);
+        mSearchView.setOnSuggestionListener(this);
 
         return true;
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
         protected void onDestroy() {
         super.onDestroy();
-        mPresenter.unbindView();
+//        mPresenter.unbindView();
     }
 }

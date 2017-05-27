@@ -12,6 +12,7 @@ import com.example.denyskravchenko.ubertestapp.presenter.requests.GetImagesColle
 import com.example.denyskravchenko.ubertestapp.view.IImagesView;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -27,7 +28,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImagesView> {
 
-    private IImagesView mView;
+    private WeakReference<IImagesView> mView;
     private List<String> mPhotosUrls;
     private LruCache<String, List<String>> mCache;
 
@@ -40,7 +41,7 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
     public void bindView(IImagesView view) {
         if (view == null)
             throw new IllegalArgumentException("View and queryString can't be null");
-        mView = view;
+        mView = new WeakReference<>(view);
 
     }
 
@@ -56,8 +57,9 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
         if (!TextUtils.isEmpty(userChoice)) {
             List<String> cache = mCache.get(userChoice);
             if (cache != null && !cache.isEmpty()) {
-                if (mView != null) {
-                    mView.showImagesByUrls(mPhotosUrls);
+                IImagesView view = mView.get();
+                if (view!= null) {
+                    view.showImagesByUrls(mPhotosUrls);
                 }
             } else {
                 String baseUrl = "https://api.flickr.com/services/rest/";
@@ -75,9 +77,10 @@ public class ImagesFetchingPresenter implements IImagesFetchingPresenter<IImages
                                     mPhotosUrls = Stream.of(photosList).map(photo ->
                                             String.format("http://farm%s.static.flickr.com/%s/%s_%s.jpg", photo.getFarm(), photo.getServer(), photo.getId(), photo.getSecret())
                                     ).collect(Collectors.toList());
-                                    if (mView != null) {
+                                    IImagesView view = mView.get();
+                                    if (view != null) {
                                         mCache.put(userChoice, mPhotosUrls);
-                                        mView.showImagesByUrls(mPhotosUrls);
+                                        view.showImagesByUrls(mPhotosUrls);
                                     }
                                 }
                             }

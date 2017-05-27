@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -18,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.example.denyskravchenko.ubertestapp.R;
 import com.example.denyskravchenko.ubertestapp.UberApplication;
 import com.example.denyskravchenko.ubertestapp.presenter.ImagesFetchingPresenter;
+import com.example.denyskravchenko.ubertestapp.presenter.SuggestionProvider;
 import com.example.denyskravchenko.ubertestapp.utils.Utils;
 
 import java.util.List;
@@ -53,6 +55,9 @@ public class ImagesView extends IImagesView {
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
+            SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+                    SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
+            suggestions.saveRecentQuery(query, null);
             searchPredictions(query);
         }
     }
